@@ -1,0 +1,23 @@
+BUILDROOT_HOME=//home/ubuntu/Desktop/buildroot
+
+CC=$(BUILDROOT_HOME)/output/host/usr/bin/arm-linux-gcc
+CCFLAGS=--sysroot=$(BUILDROOT_HOME)/output/staging
+INCLUDES=
+LFLAGS=
+
+LIBS=-lcurl -uClibc -lc
+
+SRC=assignment_network.c
+OBJ=$(SRC:.c=.o)
+MAIN=hw
+
+RM=rm -rf
+
+.c.o:
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(MAIN): $(OBJ)
+	$(CC) $(CCFLAGS) $(INCLUDES) -o $(MAIN) $(OBJ) $(LFLAGS) $(LIBS)
+
+all: $(MAIN)
+

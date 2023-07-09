@@ -1,9 +1,11 @@
-# CC=arm-linux-gnueabi-gcc
-CC=gcc
-CCFLAGS=
+BUILDROOT_HOME=//home/ubuntu/Desktop/buildroot
+
+CC=$(BUILDROOT_HOME)/output/host/usr/bin/arm-linux-gcc
+CCFLAGS=--sysroot=$(BUILDROOT_HOME)/output/staging
 INCLUDES=
-LFLAGS=-L/usr/lib/x86_64-linux-gnu
-LIBS=-lcurl -lpthread
+LFLAGS=
+
+LIBS=-lcurl -uClibc -lc
 
 SRC=requestor.c
 OBJ=$(SRC:.c=.o)
@@ -19,5 +21,3 @@ $(MAIN): $(OBJ)
 
 all: $(MAIN)
 
-clean:
-	$(RM) $(MAIN) *.o *~

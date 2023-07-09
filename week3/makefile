@@ -5,9 +5,9 @@ INCLUDES=
 LFLAGS=-L/usr/lib/x86_64-linux-gnu
 LIBS=-lcurl -lpthread
 
-SRC=requestor.c
+SRC=assignment_network.c
 OBJ=$(SRC:.c=.o)
-MAIN=test
+MAIN=hw
 
 RM=rm -rf
 
