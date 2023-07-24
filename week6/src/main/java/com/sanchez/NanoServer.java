@@ -54,21 +54,18 @@ public class NanoServer extends NanoHTTPD {
         }
     }
 
-    private Response handleGetRequest(String uri) {
-        // extract id from the uri
-        int id = extractIdFromUri(uri);
 
-        // get the data object from the database
-        DataObject dataObject = connection.getData(id);
-        if (dataObject == null) {
-            // no data found or an error occurred
-            return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Data not found");
+    private Response handleGetRequest(String uri) {
+        // if uri ends with "/", return all data
+        if (uri.endsWith("/")) {
+            List<DataObject> dataObjects = connection.getAllData();
+            if (dataObjects.isEmpty()) {
+                return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "No data found");
+            }
+            String json = gson.toJson(dataObjects);
+            return newFixedLengthResponse(Response.Status.OK, "application/json", json);
         }
 
-        // convert the data object to json
-        String json = gson.toJson(dataObject);
-        return newFixedLengthResponse(Response.Status.OK, "application/json", json);
-    }
 
     private Response handlePostOrPutRequest(String uri, IHTTPSession session, Method method) {
         // get the request body
@@ -88,12 +85,12 @@ public class NanoServer extends NanoHTTPD {
         if (method == Method.PUT) {
             // update the data
             boolean updated = connection.updateData(dataObject);
-            return updated ? newFixedLengthResponse(Response.Status.NO_CONTENT, MIME_PLAINTEXT, "")
+            return updated ? newFixedLengthResponse(Response.Status.NO_CONTENT, MIME_PLAINTEXT, "Data updated successfully")
                     : newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "Failed to update data");
         } else {
             // create new data
             int id = connection.createData(dataObject);
-            return id > 0 ? newFixedLengthResponse(Response.Status.CREATED, MIME_PLAINTEXT, Integer.toString(id))
+            return id > 0 ? newFixedLengthResponse(Response.Status.CREATED, MIME_PLAINTEXT, "Record created successfully with ID: " + id)
                     : newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "Failed to create data");
         }
     }

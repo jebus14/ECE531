@@ -52,6 +52,9 @@ public class DatabaseConnection {
             e.printStackTrace();
             return -1; // Return -1 to indicate an error
         }
+        if (affectedRows > 0) {
+            System.out.println("A new record was inserted with ID: " + generatedKeys.getInt(1));
+        }
     }
 
     public boolean updateData(DataObject dataObject) {
@@ -67,6 +70,9 @@ public class DatabaseConnection {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+        if (affectedRows > 0) {
+            System.out.println("A record was Updated: " + generatedKeys.getInt(1));
         }
     }
 
@@ -105,5 +111,29 @@ public class DatabaseConnection {
             e.printStackTrace();
             return false;
         }
+        if (affectedRows > 0) {
+            System.out.println("A new record was Deleted: " + generatedKeys.getInt(1));
+        }
     }
+
+
+    public List<DataObject> getAllData() {
+        List<DataObject> dataObjects = new ArrayList<>();
+        String sql = "SELECT id, test_word, test_number FROM test_table";
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                DataObject dataObject = new DataObject();
+                dataObject.setId(resultSet.getInt("id"));
+                dataObject.setTestWord(resultSet.getString("test_word"));
+                dataObject.setTestNumber(resultSet.getInt("test_number"));
+                dataObjects.add(dataObject);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return dataObjects;
+    }
+
 }
