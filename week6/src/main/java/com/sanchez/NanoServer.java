@@ -58,8 +58,26 @@ public class NanoServer extends NanoHTTPD {
 
 
     private Response handleGetRequest(String uri) {
-        // if uri ends with "/", return all data
-        if (uri.endsWith("/")) {
+        // If the URI matches the pattern "/[0-9]+", which is a slash followed by one or more digits
+        if (uri.matches("/[0-9]+")) { 
+            // Parse the ID from the URI (remove the leading slash and convert to an integer)
+            int id = Integer.parseInt(uri.substring(1));
+
+            // Fetch the data with the given ID from the database
+            DataObject dataObject = connection.getData(id);
+
+            // If the data exists, convert it to JSON and return it
+            if (dataObject != null) {
+                String json = gson.toJson(dataObject);
+                return newFixedLengthResponse(Response.Status.OK, "application/json", json);
+            } else {
+                // If the data does not exist, return a 404 Not Found error
+                return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Data not found");
+            }
+        }
+
+        // If the URI is "/", return all data
+        if (uri.equals("/")) {
             List<DataObject> dataObjects = connection.getAllData();
             if (dataObjects.isEmpty()) {
                 return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "No data found");
@@ -67,9 +85,11 @@ public class NanoServer extends NanoHTTPD {
             String json = gson.toJson(dataObjects);
             return newFixedLengthResponse(Response.Status.OK, "application/json", json);
         }
+
         // If it doesn't match, return a bad request response or handle the case appropriately
         return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Invalid request");
     }
+
 
     private Response handlePostRequest(String uri, IHTTPSession session) {
         DataObject dataObject = extractDataObjectFromRequest(session);
@@ -84,18 +104,30 @@ public class NanoServer extends NanoHTTPD {
                 : newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "Failed to create data");
     }
 
+
     private Response handlePutRequest(String uri, IHTTPSession session) {
+        if (!uri.matches("/[0-9]+")) {
+            return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Invalid URI");
+        }
+
+        int id = Integer.parseInt(uri.substring(1)); // Parse the ID from the URI
+
         DataObject dataObject = extractDataObjectFromRequest(session);
-        
         if (dataObject == null) {
             return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Invalid data");
         }
+
+        // Set the ID on the data object from the URI
+        dataObject.setId(id);
 
         // update the data
         boolean updated = connection.updateData(dataObject);
         return updated ? newFixedLengthResponse(Response.Status.NO_CONTENT, MIME_PLAINTEXT, "Record updated successfully")
                 : newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "Failed to update data");
     }
+
+
+
 
     private DataObject extractDataObjectFromRequest(IHTTPSession session) {
         // get the request body
