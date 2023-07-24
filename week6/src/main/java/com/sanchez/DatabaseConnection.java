@@ -10,17 +10,20 @@ import java.sql.SQLException;
 
 import com.google.gson.Gson;
 import fi.iki.elonen.NanoHTTPD;
+
 import java.io.IOException;
+
+import java.util.*;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
+
 
 import static fi.iki.elonen.NanoHTTPD.MIME_PLAINTEXT;
 import static fi.iki.elonen.NanoHTTPD.newFixedLengthResponse;
 
 
-
 public class DatabaseConnection {
-
     private static final String DB_CONNECTION = "jdbc:mysql://127.0.0.1:3306/my_database";
     private static final String ROOT = "root";
     private static final String PASSWORD = "Rocketman!";
@@ -43,6 +46,7 @@ public class DatabaseConnection {
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
+                    System.out.println("A new record was inserted with ID: " + generatedKeys.getInt(1));
                     return generatedKeys.getInt(1);
                 } else {
                     throw new SQLException("Creating data failed, no ID obtained.");
@@ -51,9 +55,6 @@ public class DatabaseConnection {
         } catch (SQLException e) {
             e.printStackTrace();
             return -1; // Return -1 to indicate an error
-        }
-        if (affectedRows > 0) {
-            System.out.println("A new record was inserted with ID: " + generatedKeys.getInt(1));
         }
     }
 
@@ -66,13 +67,13 @@ public class DatabaseConnection {
             statement.setInt(3, dataObject.getId());
 
             int affectedRows = statement.executeUpdate();
+            if (affectedRows > 0) {
+                System.out.println("A record was updated with ID: " + dataObject.getId());
+            }
             return affectedRows > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
-        }
-        if (affectedRows > 0) {
-            System.out.println("A record was Updated: " + generatedKeys.getInt(1));
         }
     }
 
@@ -106,16 +107,15 @@ public class DatabaseConnection {
             statement.setInt(1, id);
 
             int affectedRows = statement.executeUpdate();
+            if (affectedRows > 0) {
+                System.out.println("A record was deleted with ID: " + id);
+            }
             return affectedRows > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
-        if (affectedRows > 0) {
-            System.out.println("A new record was Deleted: " + generatedKeys.getInt(1));
-        }
     }
-
 
     public List<DataObject> getAllData() {
         List<DataObject> dataObjects = new ArrayList<>();
@@ -135,5 +135,4 @@ public class DatabaseConnection {
         }
         return dataObjects;
     }
-
 }

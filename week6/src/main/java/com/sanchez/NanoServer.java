@@ -5,6 +5,8 @@ import fi.iki.elonen.NanoHTTPD.Response;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.*;
@@ -65,7 +67,9 @@ public class NanoServer extends NanoHTTPD {
             String json = gson.toJson(dataObjects);
             return newFixedLengthResponse(Response.Status.OK, "application/json", json);
         }
-
+        // If it doesn't match, return a bad request response or handle the case appropriately
+        return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Invalid request");
+    }
 
     private Response handlePostOrPutRequest(String uri, IHTTPSession session, Method method) {
         // get the request body
