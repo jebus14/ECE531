@@ -109,8 +109,11 @@ public class NanoServer extends NanoHTTPD {
     }
 
     private int extractIdFromUri(String uri) {
-        // assuming the id is the last segment in the uri
         String[] segments = uri.split("/");
+        if (segments.length == 0) {
+            // return a default value or throw an exception
+            return -1;  // or throw new IllegalArgumentException("No ID in URI");
+        }
         return Integer.parseInt(segments[segments.length - 1]);
     }
 }
