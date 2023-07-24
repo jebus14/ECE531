@@ -46,9 +46,9 @@ public class NanoServer extends NanoHTTPD {
             case GET:
                 return handleGetRequest(uri);
             case POST:
-                return handlePostOrPutRequest(uri, session, Method.POST);
+                return handlePostRequest(uri, session);
             case PUT:
-                return handlePostOrPutRequest(uri, session, Method.PUT);
+                return handlePutRequest(uri, session);
             case DELETE:
                 return handleDeleteRequest(uri);
             default:
@@ -71,35 +71,43 @@ public class NanoServer extends NanoHTTPD {
         return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Invalid request");
     }
 
-    private Response handlePostOrPutRequest(String uri, IHTTPSession session, Method method) {
+    private Response handlePostRequest(String uri, IHTTPSession session) {
+        DataObject dataObject = extractDataObjectFromRequest(session);
+        
+        if (dataObject == null) {
+            return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Invalid data");
+        }
+        
+        // create new data
+        int id = connection.createData(dataObject);
+        return id > 0 ? newFixedLengthResponse(Response.Status.CREATED, MIME_PLAINTEXT, "Record created successfully with ID: " + id)
+                : newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "Failed to create data");
+    }
+
+    private Response handlePutRequest(String uri, IHTTPSession session) {
+        DataObject dataObject = extractDataObjectFromRequest(session);
+        
+        if (dataObject == null) {
+            return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Invalid data");
+        }
+
+        // update the data
+        boolean updated = connection.updateData(dataObject);
+        return updated ? newFixedLengthResponse(Response.Status.NO_CONTENT, MIME_PLAINTEXT, "Record updated successfully")
+                : newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "Failed to update data");
+    }
+
+    private DataObject extractDataObjectFromRequest(IHTTPSession session) {
         // get the request body
         Map<String, String> body = new HashMap<String, String>();
         try {
             session.parseBody(body);
         } catch (IOException | ResponseException e) {
-            return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Invalid request");
+            return null;
         }
 
         // convert the request body to a data object
-        //DataObject dataObject = gson.fromJson(body.get("postData"), DataObject.class);
-        // convert the request body to a data object
-        DataObject dataObject = gson.fromJson(body.get("json"), DataObject.class);
-
-        if (dataObject == null) {
-            return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Invalid data");
-        }
-
-        if (method == Method.PUT) {
-            // update the data
-            boolean updated = connection.updateData(dataObject);
-            return updated ? newFixedLengthResponse(Response.Status.NO_CONTENT, MIME_PLAINTEXT, "Record updated successfully")
-                    : newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "Failed to update data");
-        } else {
-            // create new data
-            int id = connection.createData(dataObject);
-            return id > 0 ? newFixedLengthResponse(Response.Status.CREATED, MIME_PLAINTEXT, "Record created successfully with ID: " + id)
-                    : newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "Failed to create data");
-        }
+        return gson.fromJson(body.get("postData"), DataObject.class);
     }
 
     private Response handleDeleteRequest(String uri) {
