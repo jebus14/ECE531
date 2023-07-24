@@ -1,0 +1,23 @@
+Jesus Sanchez 
+ECE531
+
+Inlcuded modified assignment_network.c file, makefile, and makefile-arm
+
+I also attatched compiled gcc "hw" file with the IP adress of "http://localhost:8000" 
+
+
+
+Commands I used
+
+
+./hw --post --url http://localhost:8080 "here is the message I'm posting to the URL!"
+
+./hw --get --url http://www.cnn.com
+
+./hw --put --url http://localhost:8080 "put this stuff at the URL"
+
+./hw --delete --url http://localhost:8080 78392
+
+./hw --post --url http://httpbin.org/anything "here is the message I'm posting to the URL!"
+
+./hw --get --url http://httpbin.org/anything

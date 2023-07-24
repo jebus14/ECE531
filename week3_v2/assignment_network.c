@@ -1,3 +1,14 @@
+// Jesus Sanchez
+// ECE531
+
+
+//1.  Comment out one of the URL options
+//2.  Compile using make
+//    -for gcc: make
+//    -for arm: make -f makefile-arm
+//3.  Startup simple HTTP Server: sudo python -m SimpleHTTPServer 
+
+
 #include <stdio.h>
 #include <string.h>
 #include <curl/curl.h>
@@ -6,7 +17,11 @@
 #define INIT_ERR   1
 #define REQ_ERR    2
 
-#define URL              "192.168.111.201:8000"
+//URL Option1: Use if running program on your host machine
+#define URL              "http://localhost:8000" 
+
+//URL Option 2: Set IP to your host machine IP adress if running on QEMU enviroment 
+//#define URL              "<IP Adress>:8000" 
 
 void print_help() {
     printf("Command: hw [options] [message]\n");
@@ -62,47 +77,43 @@ int main(int argc, char *argv[]) {
         return INIT_ERR;
     }
 
-    curl = curl_easy_init();
-    if (curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, url);
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+	curl = curl_easy_init();
+	if (curl) {
+		curl_easy_setopt(curl, CURLOPT_URL, URL);
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
-        if (request_type == 1) {  // POST
+		if (request_type == 1) {  // POST
             if (!message) {
                 printf("Error: No message.\n");
                 return INIT_ERR;
             }
-
+          
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, message);
 
-        } else if (request_type == 2) {  // GET
-            curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
-        } else if (request_type == 3) {  // PUT
+        } 
+        else if (request_type == 2) {  // GET
+        	curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+        } 
+        else if (request_type == 3) {  // PUT
             if (!message) {
                 printf("Error: No message.\n");
                 return INIT_ERR;
             }
             curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, message);
-        } else if (request_type == 4) {  // DELETE
+        } 
+        else if (request_type == 4) {  // DELETE
             curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, message);
         }
 
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-
-        res = curl_easy_perform(curl);
-        if (res != CURLE_OK) {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-            curl_easy_cleanup(curl);
-            return REQ_ERR;
-        }
-
-        curl_easy_cleanup(curl);
-    } else {
-        fprintf(stderr, "curl_easy_init() failed.\n");
-        return INIT_ERR;
-    }
-
-    return OK;
+		res = curl_easy_perform(curl);
+		if(res != CURLE_OK) {
+			return REQ_ERR;
+		}
+		curl_easy_cleanup(curl);
+	} else{
+		return INIT_ERR;
+	}
+	return OK;
 }
