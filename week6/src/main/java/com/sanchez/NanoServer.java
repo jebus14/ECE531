@@ -81,7 +81,10 @@ public class NanoServer extends NanoHTTPD {
         }
 
         // convert the request body to a data object
-        DataObject dataObject = gson.fromJson(body.get("postData"), DataObject.class);
+        //DataObject dataObject = gson.fromJson(body.get("postData"), DataObject.class);
+        // convert the request body to a data object
+        DataObject dataObject = gson.fromJson(body.get("json"), DataObject.class);
+
         if (dataObject == null) {
             return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Invalid data");
         }
@@ -89,7 +92,7 @@ public class NanoServer extends NanoHTTPD {
         if (method == Method.PUT) {
             // update the data
             boolean updated = connection.updateData(dataObject);
-            return updated ? newFixedLengthResponse(Response.Status.NO_CONTENT, MIME_PLAINTEXT, "Data updated successfully")
+            return updated ? newFixedLengthResponse(Response.Status.NO_CONTENT, MIME_PLAINTEXT, "Record updated successfully")
                     : newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "Failed to update data");
         } else {
             // create new data
@@ -105,7 +108,7 @@ public class NanoServer extends NanoHTTPD {
 
         // delete the data
         boolean deleted = connection.deleteData(id);
-        return deleted ? newFixedLengthResponse(Response.Status.NO_CONTENT, MIME_PLAINTEXT, "")
+        return deleted ? newFixedLengthResponse(Response.Status.NO_CONTENT, MIME_PLAINTEXT, "Record Deleted successfully")
                 : newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "Failed to delete data");
     }
 
