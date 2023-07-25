@@ -1,0 +1,47 @@
+### NanoHTTPD Server running on Amazon Web Services EC2 Instance
+
+#Required packages
+- java openjdk 11+
+- maven 3.6+
+- git
+- mysql 8+
+
+#AWS IP Address: 
+44.195.144.65:8080
+
+#Info
+NanoHTTPD server which accepts curl commands, saving data onto a MySQL Database "my_database" which accepts 2 variables. A word and a number.
+
+
+# Running Script
+chmod +x compile.sh
+./compile.sh
+
+# Running Code
+sudo mvn clean
+sudo mvn compile
+sudo mvn exec:java -Dexec.mainClass="com.sanchez.NanoServer"
+
+
+## Commands 
+
+Replace <example> and <1234> with desired input. ex:'{"testWord":"Hello", "testNumber":4321}'
+
+# POST
+curl -X POST -H "Content-Type: application/json" -d '{"testWord":"<example>", "testNumber":<1234>}' http://44.195.144.65:8080/
+
+
+# GET
+
+curl http://44.195.144.65:8080/ --Shows all objects
+curl -X GET http://44.195.144.65:8080/ --Shows all objects
+curl -X GET http://44.195.144.65:8080/<id> --Retrieves specific object
+
+# DELETE
+curl -X DELETE http://44.195.144.65:8080/<id>
+
+
+# PUT: I was not able to get PUT to work
+curl -X PUT -H "Content-Type: application/json" -d '{"postData": {"id":<1>, "testWord":"<example>", "testNumber":<1234>}}' http://44.195.144.65:8080/
+
+
